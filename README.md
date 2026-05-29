@@ -9,7 +9,7 @@
 
 ---
 
-## 🧒 What Is This? (Explain Like I Am 10 Years Old)
+## 🎯 What Does This Project Do?
 
 Imagine you want to build a race car from scratch. Most people buy a ready-made car. But some engineers want to understand EVERY part — so they build the engine themselves!
 
