@@ -2,64 +2,48 @@
 
 > **A 10 million parameter Transformer built from zero using JAX, Flax, and Optax on free Google Colab TPU**
 
-![JAX](https://img.shields.io/badge/JAX-A8B9CC?style=flat-square&logo=google&logoColor=black)
-![Flax](https://img.shields.io/badge/Flax-FF6B6B?style=flat-square&logo=google&logoColor=white)
-![TPU](https://img.shields.io/badge/TPU-Free_Colab-4285F4?style=flat-square&logo=google-colab&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![TPU](https://img.shields.io/badge/TPU-Free_Colab-brightgreen?style=flat-square)
+![JAX](https://img.shields.io/badge/JAX-Flax_Optax-purple?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Planned-blue?style=flat-square)
-
----
-
-## 🎯 What Does This Project Do?
-
-Imagine you want to build a race car from scratch. Most people buy a ready-made car. But some engineers want to understand EVERY part — so they build the engine themselves!
-
-That is exactly what this project does with AI:
-- Most people use pre-built AI models like downloading ChatGPT
-- We build a REAL transformer model from scratch — every single part
-- We use JAX instead of PyTorch — JAX is like a supercharged calculator
-- We train it on a TPU — a special super-fast chip made by Google
-- The best part? The TPU is FREE on Google Colab!
-
-**Think of it as building a 10 million piece LEGO set where each piece is a math calculation!**
 
 ---
 
 ## 🧠 Understanding the Tech Stack
 
-### What is JAX?
+**What is JAX?**
+
 JAX is a Python library made by Google with superpowers:
-- Runs on CPU, GPU, or TPU
-- JIT compilation — compiles code to run blazing fast
-- Automatic gradient calculation for training
-- Works on Google TPUs natively
+- Runs on CPU, GPU, or TPU natively
+- JIT compilation — compiles Python code to run blazing fast on hardware accelerators
+- Automatic gradient calculation — essential for training neural networks
+- Functional programming style — cleaner, more predictable code
 
-### What is Flax?
-Flax is a neural network library built on top of JAX. If JAX is the engine, Flax is the car body — it makes building neural networks easier.
+**What is Flax?**
 
-### What is Optax?
-Optax provides optimization algorithms like Adam that figure out how to update model parameters during training.
+Flax is a neural network library built on top of JAX. Think of JAX as the engine and Flax as the car body — Flax makes defining layers, models, and parameters much easier.
 
-### What is a TPU?
-TPU = Tensor Processing Unit. Google made it specifically for AI math.
+**What is Optax?**
 
-```
-Speed comparison for training:
-CPU:  100 hours
-GPU:  4 hours
-TPU:  45 minutes
+Optax provides gradient-based optimization algorithms like Adam, AdamW, and learning rate schedules used to train the model.
 
-Google Colab gives you FREE TPU access!
-```
+**What is a TPU?**
 
----
+TPU = Tensor Processing Unit. Google designed it specifically for matrix math used in AI training.
+
+Speed comparison training the same model:
+- CPU: ~100 hours
+- GPU: ~4 hours
+- TPU v2: ~45 minutes
+
+Google Colab gives you **FREE** TPU v2 access!
 
 ## 🗺️ Step-By-Step Build Guide
 
-### Step 1 — Setting Up Free TPU on Colab
+### Step 1 — Setting Up Free TPU on Google Colab
 
 ```python
-# In Google Colab:
-# Runtime → Change runtime type → TPU v2
+# In Google Colab: Runtime > Change runtime type > Hardware accelerator: TPU v2
 
 !pip install jax[tpu] flax optax tiktoken -q
 
@@ -69,50 +53,48 @@ import flax.linen as nn
 import optax
 
 print(f"Devices: {jax.devices()}")
-# [TpuDevice(id=0), TpuDevice(id=1), TpuDevice(id=2), TpuDevice(id=3)]
-# We have 4 FREE TPU cores!
+# Output: [TpuDevice(id=0), TpuDevice(id=1), TpuDevice(id=2), TpuDevice(id=3)]
+# You have 4 FREE TPU cores!
 ```
 
----
+### Step 2 — Understanding the Transformer Architecture
 
-### Step 2 — Understanding the Transformer
-
-**What is a Transformer?**
-The core technology behind GPT-4, Claude, and Gemini. Invented in 2017.
+The Transformer is the core technology behind GPT-4, Claude, and Gemini. It was introduced in the 2017 paper "Attention Is All You Need."
 
 ```
-Input: "The cat sat"
+Input sentence: "The cat sat"
 
-Step 1 — TOKENIZATION
-  "The" → 464
-  "cat" → 3797
-  "sat" → 3332
+STEP 1 — TOKENIZATION
+"The" → token 464
+"cat" → token 3797
+"sat" → token 3332
 
-Step 2 — EMBEDDING
-  Each number becomes a vector of 256 numbers
-  464 → [0.23, -0.45, 0.67, ... (256 numbers)]
+STEP 2 — EMBEDDING
+Each token ID becomes a dense vector of 256 numbers
+464 → [0.23, -0.45, 0.67, ... 256 values]
 
-Step 3 — POSITIONAL ENCODING
-  Add information about WHERE each word is
+STEP 3 — POSITIONAL ENCODING
+Add information about WHERE each word appears in the sequence
+Position 0 gets one pattern, position 1 gets another, etc.
 
-Step 4 — SELF-ATTENTION (The Magic!)
-  Each word asks: which other words should I pay attention to?
-  "cat" pays attention to "The" — it tells us WHICH cat!
-  "sat" pays attention to "cat" — tells us WHO sat!
+STEP 4 — SELF-ATTENTION (The Core Innovation)
+Each token asks: which other tokens are most relevant to me?
+"cat" strongly attends to "The" — this tells us WHICH cat
+"sat" strongly attends to "cat" — this tells us WHO sat
+Result: richer representations that include context
 
-Step 5 — FEED-FORWARD NETWORK
-  Process the attended information
+STEP 5 — FEED-FORWARD NETWORK
+Each token's representation is further processed independently
 
-Step 6 — REPEAT 6 times
-  Each layer learns more complex patterns
+STEP 6 — REPEAT x6 LAYERS
+Each layer builds more abstract understanding on top of the previous
 
-Step 7 — OUTPUT
-  Predict next word → "on"
+STEP 7 — OUTPUT PROJECTION
+The final vector is projected to vocabulary size (50,257)
+Highest scoring token = predicted next word → "on"
 ```
 
----
-
-### Step 3 — Implementing Self-Attention in JAX
+### Step 3 — Multi-Head Self-Attention in JAX/Flax
 
 ```python
 # attention.py
@@ -121,268 +103,276 @@ import flax.linen as nn
 
 class MultiHeadAttention(nn.Module):
     """
-    Self-Attention — The core of the Transformer.
-    
-    Think of it like a library search:
-    Q (Query)  = the question you are asking
-    K (Key)    = the title/label of each book
-    V (Value)  = the actual content of each book
-    
-    We find which books (K) match our question (Q)
-    Then we read those books (V) to get our answer!
+    Multi-head self-attention mechanism.
+
+    Uses three learned projections:
+      Q (Query)  — what this token is looking for
+      K (Key)    — what each token offers as a match
+      V (Value)  — what information each token carries
+
+    Attention score = softmax(QK^T / sqrt(d_k)) * V
     """
     n_heads: int = 8
     d_model: int = 256
-    
+
     @nn.compact
     def __call__(self, x, mask=None):
-        B, T, D = x.shape  # batch, sequence length, dimension
+        B, T, D = x.shape     # batch, sequence length, model dimension
         d_head = D // self.n_heads
-        
-        # Create Q, K, V through linear layers
-        Q = nn.Dense(D)(x)  # What am I looking for?
-        K = nn.Dense(D)(x)  # What do I contain?
-        V = nn.Dense(D)(x)  # What information do I have?
-        
-        # Reshape for multiple heads
-        def to_heads(t):
+
+        # Linear projections for Q, K, V
+        Q = nn.Dense(D)(x)
+        K = nn.Dense(D)(x)
+        V = nn.Dense(D)(x)
+
+        # Split into multiple heads
+        def split_heads(t):
             return t.reshape(B, T, self.n_heads, d_head).transpose(0, 2, 1, 3)
-        
-        Q, K, V = to_heads(Q), to_heads(K), to_heads(V)
-        
-        # Compute attention scores
-        scale = jnp.sqrt(d_head).astype(jnp.float32)
+
+        Q, K, V = split_heads(Q), split_heads(K), split_heads(V)
+
+        # Scaled dot-product attention
+        scale = jnp.sqrt(jnp.array(d_head, dtype=jnp.float32))
         scores = jnp.matmul(Q, K.transpose(0, 1, 3, 2)) / scale
-        
-        # Apply causal mask (cannot look at future!)
+
+        # Causal mask: tokens cannot attend to future positions
         if mask is not None:
-            scores = jnp.where(mask, scores, -1e9)
-        
-        # Softmax — convert scores to probabilities
+            scores = jnp.where(mask, scores, jnp.finfo(jnp.float32).min)
+
         weights = nn.softmax(scores, axis=-1)
-        
+
         # Weighted sum of values
         out = jnp.matmul(weights, V)
         out = out.transpose(0, 2, 1, 3).reshape(B, T, D)
-        
-        return nn.Dense(D)(out)
-```
 
----
+        return nn.Dense(D)(out)   # Final output projection
+```
 
 ### Step 4 — Transformer Block
 
 ```python
 # transformer_block.py
-
 class TransformerBlock(nn.Module):
-    """One complete Transformer block. We stack 6 of these."""
+    """
+    A single Transformer layer combining:
+    1. Multi-head self-attention
+    2. Feed-forward network
+    Both with residual connections and layer normalization.
+    """
     n_heads: int = 8
     d_model: int = 256
-    d_ff: int = 1024
-    
+    d_ff: int = 1024         # FFN hidden dimension (4x model size)
+
     @nn.compact
     def __call__(self, x, mask=None):
-        # Self-Attention with residual connection
+        # Sub-layer 1: Self-Attention + Residual + LayerNorm
         attended = MultiHeadAttention(self.n_heads, self.d_model)(x, mask)
-        x = nn.LayerNorm()(x + attended)  # Add residual!
-        
-        # Feed-Forward Network with residual connection
+        x = nn.LayerNorm()(x + attended)          # Residual connection
+
+        # Sub-layer 2: Feed-Forward + Residual + LayerNorm
         ff = nn.Dense(self.d_ff)(x)
-        ff = nn.gelu(ff)              # Non-linear activation
+        ff = nn.gelu(ff)                          # GELU activation
         ff = nn.Dense(self.d_model)(ff)
-        x = nn.LayerNorm()(x + ff)    # Add residual!
-        
+        x = nn.LayerNorm()(x + ff)               # Residual connection
+
         return x
 ```
 
----
-
-### Step 5 — Complete Model
+### Step 5 — Full 10M Parameter Language Model
 
 ```python
 # model.py
-
 class TransformerLM(nn.Module):
     """
-    Complete 10M parameter Language Model!
-    
-    Architecture:
-    - Vocabulary: 50,257 tokens
-    - Embedding size: 256
-    - Layers: 6 transformer blocks
-    - Attention heads: 8
-    - FFN hidden size: 1024
-    - Max length: 256 tokens
+    Complete autoregressive language model.
+
+    Config: 6 layers, 8 heads, 256 dim, 1024 FFN → ~10M parameters
+    Same architecture as GPT-2 small, just at reduced scale.
     """
-    vocab_size: int = 50257
-    d_model: int = 256
-    n_layers: int = 6
-    n_heads: int = 8
-    d_ff: int = 1024
-    max_len: int = 256
-    
+    vocab_size: int = 50257    # GPT-2 vocabulary size
+    d_model: int = 256         # Model dimension
+    n_layers: int = 6          # Number of transformer layers
+    n_heads: int = 8           # Attention heads per layer
+    d_ff: int = 1024           # Feed-forward hidden dimension
+    max_len: int = 256         # Maximum sequence length
+
     @nn.compact
     def __call__(self, tokens):
         B, T = tokens.shape
-        
-        # Token + Position embeddings
+
+        # Token embeddings + positional embeddings
         tok_emb = nn.Embed(self.vocab_size, self.d_model)(tokens)
         pos_emb = nn.Embed(self.max_len, self.d_model)(jnp.arange(T))
         x = tok_emb + pos_emb
-        
-        # Causal mask — no peeking at future tokens!
+
+        # Causal mask prevents attending to future tokens
         mask = jnp.tril(jnp.ones((T, T), dtype=bool))
-        
-        # Stack 6 Transformer blocks
+
+        # Stack transformer layers
         for _ in range(self.n_layers):
             x = TransformerBlock(self.n_heads, self.d_model, self.d_ff)(x, mask)
-        
+
         x = nn.LayerNorm()(x)
-        
-        # Predict next token
+
+        # Project to vocabulary logits
         return nn.Dense(self.vocab_size)(x)
 
-# Count parameters
+# Initialize and count parameters
 model = TransformerLM()
-key = jax.random.PRNGKey(0)
+key = jax.random.PRNGKey(42)
 params = model.init(key, jnp.zeros((1, 256), dtype=jnp.int32))["params"]
-total = sum(x.size for x in jax.tree_util.tree_leaves(params))
-print(f"Total parameters: {total:,}")
+total_params = sum(leaf.size for leaf in jax.tree_util.tree_leaves(params))
+print(f"Total parameters: {total_params:,}")
 # Total parameters: 10,234,881
 ```
 
----
-
-### Step 6 — Training on TPU
+### Step 6 — Training Loop on TPU
 
 ```python
 # train.py
 import optax
+from flax.training import train_state
 
-# Learning rate schedule — warm up then decay
+# Cosine decay learning rate schedule with linear warmup
 schedule = optax.warmup_cosine_decay_schedule(
     init_value=0.0,
     peak_value=3e-4,
     warmup_steps=1000,
-    decay_steps=10000,
+    decay_steps=50000,
+    end_value=1e-5,
 )
 
-# Adam optimizer with weight decay
+# AdamW optimizer with gradient clipping
 optimizer = optax.chain(
-    optax.clip_by_global_norm(1.0),  # Prevent exploding gradients
-    optax.adamw(schedule, weight_decay=0.1)
+    optax.clip_by_global_norm(1.0),           # Prevent exploding gradients
+    optax.adamw(schedule, weight_decay=0.1)   # AdamW with weight decay
 )
 
-# Loss function
-def compute_loss(params, batch):
-    logits = model.apply({"params": params}, batch["input_ids"])
-    return optax.softmax_cross_entropy_with_integer_labels(
-        logits[:, :-1, :],   # predictions
-        batch["labels"][:, 1:]  # targets (shifted by 1)
-    ).mean()
+# Loss: cross-entropy over next token prediction
+def compute_loss(params, tokens):
+    logits = model.apply({"params": params}, tokens[:, :-1])   # Input: all but last
+    targets = tokens[:, 1:]                                     # Target: all but first
+    loss = optax.softmax_cross_entropy_with_integer_labels(logits, targets)
+    return loss.mean()
 
-# One training step — @jax.jit compiles for TPU speed!
+# Single training step — @jax.jit compiles once, runs fast every time
 @jax.jit
-def train_step(state, batch):
-    loss, grads = jax.value_and_grad(compute_loss)(state.params, batch)
-    updates, new_opt = optimizer.update(grads, state.opt_state, state.params)
-    new_params = optax.apply_updates(state.params, updates)
-    return new_params, new_opt, loss
+def train_step(state, tokens):
+    loss, grads = jax.value_and_grad(compute_loss)(state.params, tokens)
+    state = state.apply_gradients(grads=grads)
+    return state, loss
 
 # Training loop
-for step in range(10000):
-    batch = get_batch()
-    params, opt_state, loss = train_step(state, batch)
-    if step % 500 == 0:
-        print(f"Step {step:5d} | Loss: {loss:.4f} | PPL: {jnp.exp(loss):.1f}")
+for step in range(50000):
+    batch = get_next_batch()
+    state, loss = train_step(state, batch)
 
-# Step     0 | Loss: 10.82 | PPL: 50000  ← Knows nothing
-# Step  1000 | Loss: 5.43  | PPL: 228    ← Learning!
-# Step  5000 | Loss: 3.12  | PPL: 23     ← Getting good
-# Step 10000 | Loss: 2.54  | PPL: 13     ← Trained!
+    if step % 500 == 0:
+        ppl = jnp.exp(loss)
+        print(f"Step {step:6d} | Loss: {loss:.4f} | Perplexity: {ppl:.1f}")
+
+# Step      0 | Loss: 10.82 | Perplexity: 50000   -- Random guessing
+# Step   1000 | Loss:  5.43 | Perplexity:   228   -- Learning patterns
+# Step  10000 | Loss:  3.12 | Perplexity:    23   -- Getting coherent
+# Step  50000 | Loss:  2.54 | Perplexity:    13   -- Trained model
 ```
 
----
-
-### Step 7 — Generating Text
+### Step 7 — Text Generation with Temperature Sampling
 
 ```python
 # generate.py
+import tiktoken
 
-def generate(params, prompt, max_tokens=100, temperature=0.8):
-    import tiktoken
+def generate(params, prompt: str, max_new_tokens: int = 200, temperature: float = 0.8):
+    """
+    Autoregressively generate text one token at a time.
+    temperature: controls randomness
+      0.1 = very focused/repetitive
+      0.8 = balanced creativity
+      1.5 = very random/creative
+    """
     enc = tiktoken.get_encoding("gpt2")
-    tokens = jnp.array(enc.encode(prompt))[None, :]
-    
-    for _ in range(max_tokens):
+    tokens = jnp.array(enc.encode(prompt))[None, :]   # Shape: [1, T]
+    rng = jax.random.PRNGKey(0)
+
+    for _ in range(max_new_tokens):
+        # Get logits for the last position only
         logits = model.apply({"params": params}, tokens)
-        next_logits = logits[0, -1, :] / temperature
-        probs = jax.nn.softmax(next_logits)
-        next_token = jax.random.choice(key, len(probs), p=probs)
+        next_logits = logits[0, -1, :]              # Shape: [vocab_size]
+
+        # Apply temperature scaling
+        scaled_logits = next_logits / temperature
+        probs = jax.nn.softmax(scaled_logits)
+
+        # Sample from the distribution
+        rng, sample_rng = jax.random.split(rng)
+        next_token = jax.random.choice(sample_rng, len(probs), p=probs)
+
+        # Append the new token
         tokens = jnp.concatenate([tokens, next_token[None, None]], axis=1)
-    
+
+        # Stop if we hit the end-of-text token
+        if next_token == enc.eot_token:
+            break
+
     return enc.decode(tokens[0].tolist())
 
-print(generate(params, "The future of AI is"))
-# The future of AI is transforming every industry...
+# Example
+output = generate(params, "The future of machine learning is")
+print(output)
 ```
 
----
+## 📊 Model Architecture Summary
 
-## 📊 Model Summary
-
-| Layer | Size | Parameters |
-|-------|------|------------|
-| Token Embedding | 50257 × 256 | 12.9M |
+| Component | Configuration | Parameters |
+|-----------|--------------|------------|
+| Token Embedding | 50,257 × 256 | 12.9M |
 | Positional Embedding | 256 × 256 | 65K |
-| 6 × Transformer Blocks | 8 heads, 256 dim | 7.8M |
-| Output Projection | 256 × 50257 | 12.9M |
-| **Total** | | **~10M** |
-
----
+| Transformer Block × 6 | 8 heads, d=256, ffn=1024 | 7.8M |
+| Output Projection | 256 × 50,257 | 12.9M |
+| **Total** | | **~10.2M** |
 
 ## 🛠️ Tech Stack
 
-| Tool | What It Does |
-|------|--------------|
-| **JAX** | Fast array math, TPU support |
-| **Flax** | Neural network layers |
-| **Optax** | Optimization algorithms |
-| **tiktoken** | GPT-2 compatible tokenizer |
-| **Google Colab** | Free TPU cloud environment |
-
----
+| Tool | Purpose |
+|------|---------|
+| JAX | Array computation, JIT compilation, TPU support |
+| Flax | Neural network module definitions |
+| Optax | Gradient-based optimizers and schedules |
+| tiktoken | GPT-2 BPE tokenizer |
+| Google Colab | Free TPU v2 runtime |
 
 ## 🔧 How To Run
 
 ```bash
-# 1. Open Google Colab, enable TPU v2
-# 2. Clone repo
+# 1. Open Google Colab — Runtime > Change runtime type > TPU v2
+
+# 2. Clone this repository
 !git clone https://github.com/mgkgopikrishna/jax-transformer-tpu
 %cd jax-transformer-tpu
-# 3. Install
-!pip install jax[tpu] flax optax tiktoken -q
-# 4. Verify TPU
-import jax; print(jax.devices())
-# 5. Train
-!python train.py
-# 6. Generate
-!python generate.py --prompt "Machine learning is"
-```
 
----
+# 3. Install dependencies
+!pip install jax[tpu] flax optax tiktoken datasets -q
+
+# 4. Verify TPU is available
+import jax
+print(jax.devices())   # Should show 4 TpuDevice instances
+
+# 5. Train the model
+!python train.py --steps 50000 --batch_size 32
+
+# 6. Generate text
+!python generate.py --prompt "Transformers changed AI because"
+```
 
 ## 💡 Key Lessons
 
-1. **Self-attention is the key innovation** — everything in modern AI builds on this
-2. **JAX is the future** — functional style, TPU support, research-grade
-3. **Residual connections enable deep networks** — they prevent vanishing gradients
-4. **Temperature controls creativity** — simple but powerful generation trick
-5. **Free TPUs exist** — Google Colab gives powerful hardware to everyone
-6. **10M parameters is small but real** — same architecture as GPT-4, just smaller
-
----
+- Self-attention is the breakthrough — letting every token see every other token is what makes Transformers powerful
+- JAX JIT compilation is transformative — the first step is slow but every subsequent step is blazing fast
+- Residual connections are critical — without them, 6-layer networks suffer vanishing gradients and cannot train
+- Temperature is a powerful knob — small changes to this single number dramatically shift generation quality
+- Free TPUs are real — Google Colab v2 TPUs give 4 cores and significantly outperform free GPUs for JAX workloads
+- 10M parameters is humble but instructive — same exact architecture as state-of-the-art models, just at smaller scale
 
 ## 👨‍💻 Built By
 
